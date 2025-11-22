@@ -5,13 +5,12 @@ import kotlinx.coroutines.*
 import okhttp3.*
 import okio.ByteString
 
-class ToPy(private val serverUrl: String = "ws://10.209.142.223:8765") {
+class ToPy(private val serverUrl: String = "ws://192.168.0.100:8765") {
 
     private val TAG = "WebSocket"
     private val client = OkHttpClient()
     var lastResponse: String? = null
         private set
-
 
     suspend fun sendAndWait(event: String, text: String, attribute: String): String? =
         withContext(Dispatchers.IO) {

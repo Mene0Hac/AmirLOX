@@ -12,8 +12,10 @@ class FavoritesManager(context: Context) {
     fun addFavorite(name: String, description: String, imageBase64: String) {
         val favorites = getFavoritesArray()
 
-        // Проверяем, чтобы не было дублей
-        if (!favorites.any { it.getString("name") == name }) {
+        // Проверяем, чтобы не было дублей по имени И описанию
+        if (!favorites.any {
+                it.getString("name") == name && it.getString("description") == description
+            }) {
             val item = JSONObject()
             item.put("name", name)
             item.put("description", description)
@@ -24,17 +26,21 @@ class FavoritesManager(context: Context) {
         }
     }
 
-    // ➤ Удалить из избранного
-    fun removeFavorite(name: String) {
+    // ➤ Удалить из избранного по имени И описанию
+    fun removeFavorite(name: String, description: String) {
         val favorites = getFavoritesArray()
-        val newList = favorites.filterNot { it.getString("name") == name }
+        val newList = favorites.filterNot {
+            it.getString("name") == name && it.getString("description") == description
+        }
         saveFavoritesArray(newList)
     }
 
-    // ➤ Проверить: товар уже в избранном?
-    fun isFavorite(name: String): Boolean {
+    // ➤ Проверить: товар уже в избранном по имени И описанию
+    fun isFavorite(name: String, description: String): Boolean {
         val favorites = getFavoritesArray()
-        return favorites.any { it.getString("name") == name }
+        return favorites.any {
+            it.getString("name") == name && it.getString("description") == description
+        }
     }
 
     // ➤ Получить список избранного как объекты
@@ -48,9 +54,14 @@ class FavoritesManager(context: Context) {
             )
         }
     }
+    fun getFavoriteKeys(): List<String> {
+        val favorites = getFavoritesArray()
+        return favorites.map {
+            it.getString("name") + "|" + it.getString("description")
+        }
+    }
 
     // --- внутренние методы для работы с JSON ---
-
     private fun getFavoritesArray(): MutableList<JSONObject> {
         val jsonString = prefs.getString("favorites", "[]") ?: "[]"
         val arr = JSONArray(jsonString)

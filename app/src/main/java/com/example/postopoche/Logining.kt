@@ -8,12 +8,13 @@ import androidx.appcompat.app.AppCompatActivity
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.android01.ToPy
-import com.example.postopoche.MainActivity.ProductAdapter
+import com.example.postopoche.ProductAdapter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.Toast
 
 import kotlinx.coroutines.*
@@ -46,7 +47,7 @@ class Logining : AppCompatActivity() {
 
         val buttonGo: Button = findViewById(R.id.buttonGo)
         val buttonEnter: Button = findViewById(R.id.buttonEnter)
-
+        val imageView9: ImageView = findViewById(R.id.imageView9)
 
 
 
@@ -56,6 +57,21 @@ class Logining : AppCompatActivity() {
         }
 
         buttonEnter.setOnClickListener {
+
+
+            imageView9.animate()
+                .scaleX(0.85f)
+                .scaleY(0.85f)
+                .setDuration(90)
+                .withEndAction {
+                    imageView9.animate()
+                        .scaleX(1f)
+                        .scaleY(1f)
+                        .setDuration(90)
+                        .start()
+                }
+                .start()
+
             val py = Py2()
 
             val name = findViewById<EditText>(R.id.name).text.toString()
