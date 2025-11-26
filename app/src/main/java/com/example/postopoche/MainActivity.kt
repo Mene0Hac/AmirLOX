@@ -44,6 +44,35 @@ import java.util.regex.Pattern
 class SreverState(){
     var idname: String = ""
 }
+
+data class ServerResponse(
+    val data: List<ProductJson>
+)
+
+data class ProductJson(
+    val id: Int,
+    val title: String,
+    val description: String,
+    val description_of_cooking_process: String,
+    val caloric_content: Int,
+    val rating: Double,
+    val author: AuthorJson,
+    val ingredients: List<IngredientJson>
+)
+data class AuthorJson(
+    val id: Int,
+    val username: String,
+    val is_admin: Boolean,
+    val is_banned: Boolean
+)
+
+data class IngredientJson(
+    val id: Int,
+    val title: String,
+    val amount: String,
+    val description: String
+)
+
 class Settings(private val context: Context) {
     var seeKalories: Boolean = true
     var seeReting: Boolean = true
@@ -176,15 +205,29 @@ fun runOnUiThread(action: () -> Unit) {
 }
 
 
+fun parseServerResponse(response: String): List<MainActivity.Product> {
+    val gson = Gson()
+    val type = object : TypeToken<ServerResponse>() {}.type
+    val serverResponse: ServerResponse = gson.fromJson(response, type)
 
-
-fun parseServerResponse(response: String): List<Product> {
-    val regex = Regex("""Product\("([^"]+)",\s*"([^"]+)",\s*"([^"]*)",\s*"([^"]*)",\s*"([^"]*)",\s*"([^"]*)",\s*"([^"]*)",\s*"([^"]*)"\)""")
-    return regex.findAll(response).map { match ->
-        val (name, desc, base64, recipe,rating,calories,avtor,products) = match.destructured
-        Product(name.ifBlank { "Без названия" }, desc.ifBlank { "Тут должно быть описание" }, base64, recipe.ifBlank { "Рецепта нет!" },rating,calories.ifBlank { "Не указано" }, avtor.ifBlank{ "Инкогнито" },products.ifBlank { "Нет продуктов" })
-    }.toList()
+    return serverResponse.data.map { p ->
+        MainActivity.Product(
+            name = p.title.ifBlank { "Без названия" },
+            description = p.description.ifBlank { "Тут должно быть описание" },
+            imageBase64 = null, // сервер пока не присылает
+            recipe = p.description_of_cooking_process.ifBlank { "Рецепта нет!" },
+            rating = p.rating.toString(),
+            calories = p.caloric_content.toString(),
+            avtor = p.author.username.ifBlank { "Инкогнито" },
+            products = if (p.ingredients.isEmpty()) {
+                "Нет продуктов"
+            } else {
+                p.ingredients.joinToString(", ") { it.title }
+            }
+        )
+    }
 }
+
 
 
 
@@ -352,19 +395,26 @@ class MainActivity : AppCompatActivity() {
                             api.post("","","") { result ->
                                 if (result.isNotBlank()) {
                                     try {
+                                        println(result)
+                                        val products = parseServerResponse(result)
                                         val decodeds = result.replace("\\u", "\\u")
                                             .let { Pattern.compile("\\\\u([0-9A-Fa-f]{4})").matcher(it) }
                                             .replaceAll { matchResult ->
                                                 Integer.parseInt(matchResult.group(1), 16).toChar().toString()
                                             }
+                                        val i =
 
                                         //Toast.makeText(this, "!@"+result, Toast.LENGTH_SHORT).show()
+
                                         println(result)
+
+                                        adapter.updateProducts(products)
 
 
 
                                     } catch (e: Exception) {
                                         Toast.makeText(this, "!"+e, Toast.LENGTH_SHORT).show()
+                                        println(e)
                                     }
                                 }
                                 else{

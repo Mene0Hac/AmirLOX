@@ -13,7 +13,7 @@ import java.io.IOException
 class ServerApi {
 
     private val client = OkHttpClient()
-    private val url= "http://26.196.186.232:5001/"
+    private val url= "http://5.182.87.105:5001/"
 
     fun post(
         route: String,
