@@ -9,7 +9,7 @@ class FavoritesManager(context: Context) {
     private val prefs = context.getSharedPreferences("favorites_data", Context.MODE_PRIVATE)
 
     // ➤ Добавить новый элемент в избранное
-    fun addFavorite(name: String, description: String, imageBase64: String) {
+    fun addFavorite(name: String, description: String, imageBase64: String,recipe: String ,rating: String,calories: String,avtor: String,products: String) {
         val favorites = getFavoritesArray()
 
         // Проверяем, чтобы не было дублей по имени И описанию
@@ -20,6 +20,11 @@ class FavoritesManager(context: Context) {
             item.put("name", name)
             item.put("description", description)
             item.put("imageBase64", imageBase64)
+            item.put("recipe",recipe)
+            item.put("rating",rating)
+            item.put("calories",calories)
+            item.put("avtor",avtor)
+            item.put("products",products)
 
             favorites.add(item)
             saveFavoritesArray(favorites)
@@ -50,7 +55,13 @@ class FavoritesManager(context: Context) {
             FavoriteItem(
                 it.getString("name"),
                 it.getString("description"),
-                it.getString("imageBase64")
+                it.getString("imageBase64"),
+                        it.getString("recipe"),
+                it.getString("rating"),
+                it.getString("calories"),
+                it.getString("avtor"),
+                        it.getString("products")
+
             )
         }
     }
@@ -83,6 +94,11 @@ class FavoritesManager(context: Context) {
     data class FavoriteItem(
         val name: String,
         val description: String,
-        val imageBase64: String
+        val imageBase64: String,
+        val recipe: String,
+        val rating: String,
+        val calories: String,
+        val avtor: String,
+        val products: String
     )
 }

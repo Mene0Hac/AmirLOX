@@ -5,7 +5,7 @@ import kotlinx.coroutines.*
 import okhttp3.*
 import okio.ByteString
 
-class ToPy(private val serverUrl: String = "ws://192.168.0.100:8765") {
+class ToPy(private val serverUrl: String = "ws://10.62.3.223:8765") {
 
     private val TAG = "WebSocket"
     private val client = OkHttpClient()

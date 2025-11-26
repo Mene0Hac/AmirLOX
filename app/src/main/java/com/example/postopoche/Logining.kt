@@ -68,22 +68,25 @@ class Logining : AppCompatActivity() {
                         .scaleX(1f)
                         .scaleY(1f)
                         .setDuration(90)
+                        .withEndAction {
+                            val py = Py2()
+
+                            val name = findViewById<EditText>(R.id.name).text.toString()
+                            val pass = findViewById<EditText>(R.id.pass).text.toString()
+
+                            py.sender("log", name, pass) { response ->
+                                // Просто показываем то, что вернул сервер
+                                Toast.makeText(this, "Ответ: $response", Toast.LENGTH_LONG).show()
+
+                                intent.putExtra("message", response)
+
+                            }
+                        }
                         .start()
                 }
                 .start()
 
-            val py = Py2()
 
-            val name = findViewById<EditText>(R.id.name).text.toString()
-            val pass = findViewById<EditText>(R.id.pass).text.toString()
-
-            py.sender("log", name, pass) { response ->
-                // Просто показываем то, что вернул сервер
-                Toast.makeText(this, "Ответ: $response", Toast.LENGTH_LONG).show()
-
-                intent.putExtra("message", response)
-
-            }
         }
 
 

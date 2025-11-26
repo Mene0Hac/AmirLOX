@@ -26,8 +26,47 @@ import androidx.core.content.ContextCompat
 import com.example.android01.ServerApi
 import com.example.postopoche.MainActivity.Product
 
+import com.google.android.material.navigation.NavigationView
+import androidx.drawerlayout.widget.DrawerLayout
+import android.view.Gravity
+import androidx.core.view.GravityCompat
+import androidx.appcompat.widget.SwitchCompat
+import androidx.lifecycle.Lifecycle
+
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+
 import org.json.JSONArray
 import org.json.JSONObject
+import java.util.regex.Pattern
+
+
+class SreverState(){
+    var idname: String = ""
+}
+class Settings(private val context: Context) {
+    var seeKalories: Boolean = true
+    var seeReting: Boolean = true
+    var BigLook: Boolean = false
+
+    private val prefs = context.getSharedPreferences("my_settings", Context.MODE_PRIVATE)
+
+    fun save() {
+        prefs.edit().apply {
+            putBoolean("seeKalories", seeKalories)
+            putBoolean("seeReting", seeReting)
+            putBoolean("BigLook", BigLook)
+            apply()
+        }
+    }
+
+    fun load() {
+        seeKalories = prefs.getBoolean("seeKalories", true)
+        seeReting = prefs.getBoolean("seeReting", true)
+        BigLook = prefs.getBoolean("BigLook", true)
+    }
+}
+
 
 
 
@@ -53,18 +92,18 @@ class LocalData {
     )
 
     val fruits = listOf(
-        MainActivity.Product("Яблоко", "С1вежее красное яблоко"),
-        MainActivity.Product("Банан", "Жёлтый и сладкий","","")
+        Product("Яблоко", "С1вежее красное яблоко"),
+        Product("Банан", "Жёлтый и сладкий","","")
     )
 
     val vegetables = listOf(
-        MainActivity.Product("Морковь", "Полезная и хрустящая","",""),
-        MainActivity.Product("Огурец", "Свежий и зелёный","","")
+        Product("Морковь", "Полезная и хрустящая","",""),
+        Product("Огурец", "Свежий и зелёный","","")
     )
 
     val drinks = listOf(
-        MainActivity.Product("Сок", "Апельсиновый, натуральный","",""),
-        MainActivity.Product("Кофе", "Ароматный и бодрящий","","")
+        Product("Сок", "Апельсиновый, натуральный","",""),
+        Product("Кофе", "Ароматный и бодрящий","","")
     )
 
 
@@ -90,19 +129,45 @@ class Py {
 class Api(){
     private val ser = ServerApi()
 
+    var decoded: String =""
+
+    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    fun sender(): String {
+        post("","","") { result ->
+            if (result.isNotBlank()) {
+                try {
+                    val decodeds = result.replace("\\u", "\\u")
+                        .let { Pattern.compile("\\\\u([0-9A-Fa-f]{4})").matcher(it) }
+                        .replaceAll { matchResult ->
+                            Integer.parseInt(matchResult.group(1), 16).toChar().toString()
+                        }
+                    this.decoded = result
 
 
-    fun post(onResult: (String) -> Unit) {
-        ser.post(
-            route = "test",
-            params = mapOf("username" to "NakoLox", "password" to "Neko12")
-        ) { result ->
-            runOnUiThread {
-                onResult(result) // ← передаём результат наружу
+
+                } catch (e: Exception) {
+
+                }
+            }
+            else{
+
             }
         }
+        return decoded
     }
 
+
+
+        fun post(event: String,text:String,atribute: String, onResult: (String) -> Unit) {
+            ser.get(
+                route = "get_all_recipes",
+                //params = mapOf("username" to "NakoLox", "password" to "Neko12")
+            ) { result ->
+                runOnUiThread {
+                    onResult(result) // ← передаём результат наружу
+                }
+            }
+    }
 }
 fun runOnUiThread(action: () -> Unit) {
     CoroutineScope(Dispatchers.Main).launch {
@@ -113,11 +178,11 @@ fun runOnUiThread(action: () -> Unit) {
 
 
 
-fun parseServerResponse(response: String): List<MainActivity.Product> {
-    val regex = Regex("""Product\("([^"]+)",\s*"([^"]+)",\s*"([^"]*)",\s*"([^"]*)"\)""")
+fun parseServerResponse(response: String): List<Product> {
+    val regex = Regex("""Product\("([^"]+)",\s*"([^"]+)",\s*"([^"]*)",\s*"([^"]*)",\s*"([^"]*)",\s*"([^"]*)",\s*"([^"]*)",\s*"([^"]*)"\)""")
     return regex.findAll(response).map { match ->
-        val (name, desc, base64, recipe) = match.destructured
-        MainActivity.Product(name, desc, base64, recipe)
+        val (name, desc, base64, recipe,rating,calories,avtor,products) = match.destructured
+        Product(name.ifBlank { "Без названия" }, desc.ifBlank { "Тут должно быть описание" }, base64, recipe.ifBlank { "Рецепта нет!" },rating,calories.ifBlank { "Не указано" }, avtor.ifBlank{ "Инкогнито" },products.ifBlank { "Нет продуктов" })
     }.toList()
 }
 
@@ -127,10 +192,14 @@ fun parseServerResponse(response: String): List<MainActivity.Product> {
 class MainActivity : AppCompatActivity() {
 
     data class Product(
-        val name: String,
-        val description: String,
+        val name: String = "Без названия",
+        val description: String = "Тут должно быть описание",
         val imageBase64: String? = null,
-        val recipe: String? = "Рецепта нет!"
+        val recipe: String = "Рецепта нет!",
+        val rating: String = "",
+        val calories: String = "Не указано",
+        val avtor: String = "Инкогнито",
+        val products: String = "Нет продуктов"
     )
 
     private lateinit var recyclerView: RecyclerView
@@ -151,15 +220,31 @@ class MainActivity : AppCompatActivity() {
         val button2: Button = findViewById(R.id.button2)
         val button3: Button = findViewById(R.id.button1)
         val buttonReg: Button = findViewById(R.id.buttonReg)
+        val py = Py()
+
+        val buttonSet: Button = findViewById(R.id.buttonSet)
+
         val imageView: ImageView = findViewById(R.id.imageView)
         val imageView2: ImageView = findViewById(R.id.imageView2)
         val imageView3: ImageView = findViewById(R.id.imageView3)
         val imageView5: ImageView = findViewById(R.id.imageView5)
 
+
+
         recyclerView = findViewById(R.id.RecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        adapter = ProductAdapter(mutableListOf())
+
+
+        fun onResume() {
+            super.onResume()
+
+
+            adapter.recreateList(recyclerView)
+        }
+
+
+        adapter = ProductAdapter(this,mutableListOf())
         recyclerView.adapter = adapter
 
         adapter.initFavorites(this)       // ← грузим избранное ОДИН раз
@@ -179,37 +264,38 @@ class MainActivity : AppCompatActivity() {
                         .scaleX(1f)
                         .scaleY(1f)
                         .setDuration(90)
+                        .withEndAction {
+                            py.sender { response ->
+                                if (response.isNotBlank()) {
+                                    try {
+                                        val products = parseServerResponse(response)
+                                        if (products.isNotEmpty()) {
+                                            runOnUiThread {
+                                                adapter.updateProducts(products)
+                                                Toast.makeText(this, "Обновлено", Toast.LENGTH_SHORT).show()
+                                            }
+                                        } else {
+                                            runOnUiThread {
+                                                Toast.makeText(this, "Нет корректных данных", Toast.LENGTH_SHORT).show()
+                                            }
+                                        }
+                                    } catch (e: Exception) {
+                                        runOnUiThread {
+                                            Toast.makeText(this, "Ошибка парсинга данных", Toast.LENGTH_SHORT).show()
+                                        }
+                                        e.printStackTrace()
+                                    }
+                                } else {
+                                    runOnUiThread {
+                                        Toast.makeText(this, "Пустой ответ от сервера", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            }
+                        }
                         .start()
                 }
                 .start()
 
-            val py = Py()
-            py.sender { response ->
-                if (response.isNotBlank()) {
-                    try {
-                        val products = parseServerResponse(response)
-                        if (products.isNotEmpty()) {
-                            runOnUiThread {
-                                adapter.updateProducts(products)
-                                Toast.makeText(this, "Обновлено", Toast.LENGTH_SHORT).show()
-                            }
-                        } else {
-                            runOnUiThread {
-                                Toast.makeText(this, "Нет корректных данных", Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                    } catch (e: Exception) {
-                        runOnUiThread {
-                            Toast.makeText(this, "Ошибка парсинга данных", Toast.LENGTH_SHORT).show()
-                        }
-                        e.printStackTrace()
-                    }
-                } else {
-                    runOnUiThread {
-                        Toast.makeText(this, "Пустой ответ от сервера", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
         }
 
         button3.setOnClickListener {
@@ -223,29 +309,28 @@ class MainActivity : AppCompatActivity() {
                         .scaleX(1f)
                         .scaleY(1f)
                         .setDuration(90)
+                        .withEndAction {
+                            val favManager = FavoritesManager(this)
+                            val saved = favManager.getFavorites()
+
+                            if (saved.toString() != "[]"){
+                                val productList = saved.map {
+                                    Product(it.name, it.description, it.imageBase64, it.recipe,it.rating,it.calories,it.avtor,it.products)
+                                }.toMutableList()
+
+                                if (recyclerView.layoutManager == null) {
+                                    recyclerView.layoutManager = LinearLayoutManager(this)
+                                }
+
+                                adapter.updateProducts(productList)
+                            }
+                            else{
+                                Toast.makeText(this, "Вы пока ничего не добавили в избранное!", Toast.LENGTH_SHORT).show()
+                            }
+                        }
                         .start()
                 }
                 .start()
-
-
-            val favManager = FavoritesManager(this)
-            val saved = favManager.getFavorites()
-
-
-            if (saved.toString() != "[]"){
-                val productList = saved.map {
-                    Product(it.name, it.description, it.imageBase64)
-                }.toMutableList()
-
-                if (recyclerView.layoutManager == null) {
-                    recyclerView.layoutManager = LinearLayoutManager(this)
-                }
-
-                adapter.updateProducts(productList)
-            }
-            else{
-                Toast.makeText(this, "Вы пока ничего не добавили в избранное!", Toast.LENGTH_SHORT).show()
-            }
 
         }
 
@@ -260,15 +345,42 @@ class MainActivity : AppCompatActivity() {
                         .scaleX(1f)
                         .scaleY(1f)
                         .setDuration(90)
+                        .withEndAction {
+
+                            Toast.makeText(this, "11", Toast.LENGTH_SHORT).show()
+                            val api=Api()
+                            api.post("","","") { result ->
+                                if (result.isNotBlank()) {
+                                    try {
+                                        val decodeds = result.replace("\\u", "\\u")
+                                            .let { Pattern.compile("\\\\u([0-9A-Fa-f]{4})").matcher(it) }
+                                            .replaceAll { matchResult ->
+                                                Integer.parseInt(matchResult.group(1), 16).toChar().toString()
+                                            }
+
+                                        //Toast.makeText(this, "!@"+result, Toast.LENGTH_SHORT).show()
+                                        println(result)
+
+
+
+                                    } catch (e: Exception) {
+                                        Toast.makeText(this, "!"+e, Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                                else{
+                                    Toast.makeText(this, "44", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+
+
+                        }
                         .start()
                 }
                 .start()
-
-            adapter.updateProducts(data.drinks)
-            Toast.makeText(this, "☕ Показаны напитки", Toast.LENGTH_SHORT).show()
         }
 
-            //Toast.makeText(this, "est.toString()" , Toast.LENGTH_SHORT).show()
+
+        //Toast.makeText(this, "est.toString()" , Toast.LENGTH_SHORT).show()
             //fav.getFavorites()
             //adapter.updateProducts(data.drinks)
             //Toast.makeText(this, "☕ Показаны напитки", Toast.LENGTH_SHORT).show()
@@ -285,19 +397,85 @@ class MainActivity : AppCompatActivity() {
                         .scaleX(1f)
                         .scaleY(1f)
                         .setDuration(90)
+                        .withEndAction {
+                            val intent = Intent(this, Logining::class.java)
+                            startActivity(intent)
+                        }
                         .start()
                 }
                 .start()
 
-            val intent = Intent(this, Logining::class.java)
-            startActivity(intent)
+        }
+
+
+        val imageView4: ImageView = findViewById(R.id.imageView4)
+        val drawer = findViewById<DrawerLayout>(R.id.drawerLayout)
+        val nav = findViewById<NavigationView>(R.id.navigationView)
+        val item1 = nav.menu.findItem(R.id.switch1)
+        val switch1 = item1.actionView?.findViewById<SwitchCompat>(R.id.switchControl)
+        val item2 = nav.menu.findItem(R.id.switch2)
+        val switch2 = item2.actionView?.findViewById<SwitchCompat>(R.id.switchControl)
+
+        val stng = Settings(this)
+        stng.load() // загружаем настройки из памяти
+
+        buttonSet.setOnClickListener {
+            imageView4.animate()
+                .scaleX(0.85f)
+                .scaleY(0.85f)
+                .setDuration(90)
+                .withEndAction {
+                    imageView4.animate()
+                        .scaleX(1f)
+                        .scaleY(1f)
+                        .setDuration(90)
+                        .start()
+                }
+                .start()
+
+            drawer.openDrawer(GravityCompat.START)
+        }
+
+// Устанавливаем переключатели после того, как меню построено
+        nav.post {
+            val switch1 = nav.menu.findItem(R.id.switch1)
+                .actionView?.findViewById<SwitchCompat>(R.id.switchControl)
+            val switch2 = nav.menu.findItem(R.id.switch2)
+                .actionView?.findViewById<SwitchCompat>(R.id.switchControl)
+            val switch3 = nav.menu.findItem(R.id.switch3)
+                .actionView?.findViewById<SwitchCompat>(R.id.switchControl)
+
+            // Ставим состояние из настроек
+            switch1?.isChecked = stng.seeKalories
+            switch2?.isChecked = stng.seeReting
+            switch3?.isChecked = stng.BigLook
+
+
+
+
+            // Обработчик изменения
+            switch1?.setOnCheckedChangeListener { _, isChecked ->
+                stng.seeKalories = isChecked
+                stng.save()
+                onResume()
+                //Toast.makeText(this, "Переключатель 1: $isChecked", Toast.LENGTH_SHORT).show()
+            }
+
+            switch2?.setOnCheckedChangeListener { _, isChecked ->
+                stng.seeReting = isChecked
+                stng.save()
+                onResume()
+            }
+
+            switch3?.setOnCheckedChangeListener { _, isChecked ->
+                stng.BigLook = isChecked
+                stng.save()
+                onResume()
+            }
         }
 
 
 
-
-        recyclerView = findViewById(R.id.RecyclerView)
-        recyclerView.layoutManager = LinearLayoutManager(this)
 
 
 

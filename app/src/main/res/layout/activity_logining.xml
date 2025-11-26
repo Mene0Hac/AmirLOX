@@ -33,8 +33,8 @@
 
     <ImageView
         android:id="@+id/imageView8"
-        android:layout_width="333dp"
-        android:layout_height="766dp"
+        android:layout_width="353dp"
+        android:layout_height="810dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -59,6 +59,7 @@
         android:layout_height="59dp"
         android:ems="10"
         android:inputType="text"
+        android:textColor="@color/black"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -71,11 +72,13 @@
         android:layout_height="62dp"
         android:ems="10"
         android:inputType="textPassword"
+        android:textColor="@color/black"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.518" />
+        app:layout_constraintVertical_bias="0.518"
+        />
 
     <Button
         android:id="@+id/buttonGo"
@@ -104,6 +107,7 @@
         android:layout_width="174dp"
         android:layout_height="41dp"
         android:text="Логин"
+        android:textColor="@color/black"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.312"
@@ -116,6 +120,7 @@
         android:layout_width="174dp"
         android:layout_height="41dp"
         android:text="Пароль"
+        android:textColor="@color/black"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.299"

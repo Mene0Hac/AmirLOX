@@ -33,19 +33,19 @@
 
                 <TextView
                     android:id="@+id/name"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
+                    android:layout_width="201dp"
                     android:layout_height="wrap_content"
-                    android:textSize="18sp"
-                    android:textColor="@android:color/white"/>
+                    android:layout_weight="1"
+                    android:textColor="@android:color/white"
+                    android:textSize="18sp" />
 
                 <Button
                     android:id="@+id/favoriteButton"
-                    android:text="☆"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="72dp"
+                    android:layout_height="39dp"
                     android:background="@android:color/transparent"
-                    android:textSize="22sp"/>
+                    android:text="☆"
+                    android:textSize="22sp" />
             </LinearLayout>
 
             <TextView

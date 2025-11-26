@@ -13,7 +13,7 @@ import java.io.IOException
 class ServerApi {
 
     private val client = OkHttpClient()
-    private val url= "http://26.196.186.232:5000/"
+    private val url= "http://26.196.186.232:5001/"
 
     fun post(
         route: String,
@@ -48,11 +48,12 @@ class ServerApi {
     }
 
     fun get(
-        url: String,
+        route: String,
         callback: (String) -> Unit
     ) {
+        val curl=this.url+route
         val request = Request.Builder()
-            .url(url)
+            .url(curl)
             .get()
             .build()
 
