@@ -3,7 +3,17 @@
     <style name="Base.Theme.PoStopoche" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
 
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <!-- Основной фон Activity и пустых областей (letterbox) -->
+        <item name="android:windowBackground">@color/white</item>
+
+        <!-- Цвет статус-бара -->
+        <item name="android:statusBarColor">@color/white</item>
+
+        <!-- Цвет навигационной панели -->
+        <item name="android:navigationBarColor">@color/white</item>
+
+        <!-- Использование вырезов (notch) -->
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
     </style>
 
     <style name="Theme.PoStopoche" parent="Base.Theme.PoStopoche" />

@@ -1,0 +1,117 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/fon2">
+
+
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+
+        <ImageView
+            android:id="@+id/imgRecipe"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_launcher_background"
+            android:scaleType="centerCrop"
+            android:background="#CCCCCC" />
+
+        <Button
+            android:id="@+id/btnChooseImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Выбрать изображение"
+            android:layout_gravity="center"
+            android:layout_marginBottom="24dp"/>
+
+
+        <TextView
+            android:id="@+id/textView5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:text="TextView" />
+
+        <EditText
+            android:id="@+id/edName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:backgroundTint="#000000"
+            android:hint="Название рецепта" />
+
+        <TextView
+            android:id="@+id/textView6"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:text="TextView" />
+
+        <EditText
+            android:id="@+id/edDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:backgroundTint="#000000"
+            android:hint="Описание" />
+
+        <TextView
+            android:id="@+id/textView7"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:text="TextView" />
+
+        <EditText
+            android:id="@+id/edRecipe"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:backgroundTint="#000000"
+            android:hint="Рецепт" />
+
+        <TextView
+            android:id="@+id/textView8"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:text="TextView" />
+
+        <EditText
+            android:id="@+id/edProducts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:backgroundTint="#000000"
+            android:hint="Список продуктов" />
+
+        <TextView
+            android:id="@+id/textView9"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:text="TextView" />
+
+        <EditText
+            android:id="@+id/edCalories"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:backgroundTint="#000000"
+            android:hint="Калорийность" />
+
+        <Button
+            android:id="@+id/btnSave"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Сохранить"
+            android:layout_marginTop="20dp"/>
+
+    </LinearLayout>
+</ScrollView>

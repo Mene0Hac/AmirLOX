@@ -1,15 +1,71 @@
 package com.example.android01
+import android.os.Build
 import okhttp3.*
 import android.os.Bundle
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.postopoche.runOnUiThread
 import java.io.IOException
+import java.util.regex.Pattern
+
+
+class Api(){
+    private val ser = ServerApi()
+
+    var decoded: String =""
+
+    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    fun sender(): String {
+        get("get_all_recipes"){ result ->
+            if (result.isNotBlank()) {
+                try {
+                    val decodeds = result.replace("\\u", "\\u")
+                        .let { Pattern.compile("\\\\u([0-9A-Fa-f]{4})").matcher(it) }
+                        .replaceAll { matchResult ->
+                            Integer.parseInt(matchResult.group(1), 16).toChar().toString()
+                        }
+                    this.decoded = result
 
 
 
+                } catch (e: Exception) {
+
+                }
+            }
+            else{
+
+            }
+        }
+        return decoded
+    }
+
+
+
+    fun get(route: String,onResult: (String) -> Unit) {
+        ser.get(
+            route = route,
+            //params = mapOf("username" to "NakoLox", "password" to "Neko12")
+        ) { result ->
+            runOnUiThread {
+                onResult(result) // передаём результат наружу
+            }
+        }
+    }
+    fun post(event: String,text:String,atribute: String, onResult: (String) -> Unit) {
+        ser.post(
+            route = event,
+            params = mapOf("username" to text, "password" to atribute)
+        ) { result ->
+            runOnUiThread {
+                onResult(result) // передаём результат наружу
+            }
+        }
+    }
+}
 class ServerApi {
 
     private val client = OkHttpClient()

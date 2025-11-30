@@ -19,4 +19,9 @@
         android:title="Режим"
         app:actionLayout="@layout/switch_item"
         app:showAsAction="always"/>
+    <item
+        android:id="@+id/switch4"
+        android:title="id"
+        app:actionLayout="@layout/switch_item"
+        app:showAsAction="always"/>
 </menu>

@@ -13,7 +13,9 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.PoStopoche">
+        android:theme="@style/Theme.PoStopoche"
+        android:windowLayoutInDisplayCutoutMode="shortEdges"
+        android:resizeableActivity="true">
 
         <activity
             android:name=".MainActivity"
@@ -21,42 +23,40 @@
             android:configChanges="orientation|screenSize"
             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-
 
         <activity
             android:name=".Logining"
             android:configChanges="orientation|screenSize"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:exported="true" />
 
         <activity
-            android:name=".Registing"
+            android:name=".Registering"
             android:configChanges="orientation|screenSize"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:exported="true" />
 
         <activity
             android:name=".ProductDetails"
             android:configChanges="orientation|screenSize"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:exported="true" />
+
+        <activity
+            android:name=".UserRecepi"
+            android:configChanges="orientation|screenSize"
+            android:exported="true" />
+
+        <activity
+            android:name=".Addrecept"
+            android:configChanges="orientation|screenSize"
+            android:exported="true" />
+
+        <activity
+            android:name="com.yalantis.ucrop.UCropActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
 
     </application>
-
 </manifest>

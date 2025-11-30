@@ -18,6 +18,10 @@ import android.widget.Button
 import android.widget.Toast
 import kotlinx.coroutines.*
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.view.WindowManager
@@ -32,17 +36,20 @@ import android.view.Gravity
 import androidx.core.view.GravityCompat
 import androidx.appcompat.widget.SwitchCompat
 import androidx.lifecycle.Lifecycle
+import com.example.android01.Api
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.ByteArrayOutputStream
 import java.util.regex.Pattern
 
 
-class SreverState(){
-    var idname: String = ""
+class savet(){
+    var username = ""
+    var token = ""
 }
 
 data class ServerResponse(
@@ -73,38 +80,21 @@ data class IngredientJson(
     val description: String
 )
 
-class Settings(private val context: Context) {
-    var seeKalories: Boolean = true
-    var seeReting: Boolean = true
-    var BigLook: Boolean = false
 
-    private val prefs = context.getSharedPreferences("my_settings", Context.MODE_PRIVATE)
 
-    fun save() {
-        prefs.edit().apply {
-            putBoolean("seeKalories", seeKalories)
-            putBoolean("seeReting", seeReting)
-            putBoolean("BigLook", BigLook)
-            apply()
-        }
+
+class LocalData (private val context: Context){
+
+    fun load(context: Context):String{
+        val settings = Settings(context)
+        settings.load()
+        println("!!set "+settings.temp)
+        return settings.temp
     }
-
-    fun load() {
-        seeKalories = prefs.getBoolean("seeKalories", true)
-        seeReting = prefs.getBoolean("seeReting", true)
-        BigLook = prefs.getBoolean("BigLook", true)
-    }
-}
-
-
-
-
-class LocalData {
-
 
     val defaultProducts = mutableListOf(
-        Product("Яблоко", "Свежее красное яблоко"),
-        Product("Банан", "Спелый жёлтый банан"),
+        Product("Яблоко", "Свежее красное яблоко",(drawableToBase64(context,R.drawable.yak)),avtor="mene"),
+        Product("Банан", "Спелый жёлтый банан", imageBase64 = load(context)),
         Product("Апельсин", "Сочный апельсин, богатый витамином C"),
         Product("Виноград", "Сладкий зелёный виноград"),
         Product("Груша", "Ароматная спелая груша"),
@@ -120,10 +110,31 @@ class LocalData {
         Product("Дыня", "Ароматная дыня, идеальна для жары")
     )
 
-    val fruits = listOf(
-        Product("Яблоко", "С1вежее красное яблоко"),
-        Product("Банан", "Жёлтый и сладкий","","")
+    var editLits = listOf(
+        Product(
+            name = "Большое яблоко",
+            description = "Свежее красное яблоко, идеально для десертов и салатов.",
+            imageBase64 = "",
+            recipe = "Помыть яблоко, нарезать на дольки и подать с медом.",
+            rating = "4.5",
+            calories = "95",
+            avtor = "mene",
+            id = "1",
+            products = "яблоко"
+        ),
+        Product(
+            name = "Не спелый банан",
+            description = "Жёлтый и сладкий банан, пока слегка твердый.",
+            imageBase64 = "",
+            recipe = "Очистить банан, нарезать кружочками и добавить в смузи.",
+            rating = "4.2",
+            calories = "105",
+            avtor = "mene",
+            id = "2",
+            products = "банан"
+        )
     )
+
 
     val vegetables = listOf(
         Product("Морковь", "Полезная и хрустящая","",""),
@@ -155,55 +166,37 @@ class Py {
     }
 }
 
-class Api(){
-    private val ser = ServerApi()
-
-    var decoded: String =""
-
-    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
-    fun sender(): String {
-        post("","","") { result ->
-            if (result.isNotBlank()) {
-                try {
-                    val decodeds = result.replace("\\u", "\\u")
-                        .let { Pattern.compile("\\\\u([0-9A-Fa-f]{4})").matcher(it) }
-                        .replaceAll { matchResult ->
-                            Integer.parseInt(matchResult.group(1), 16).toChar().toString()
-                        }
-                    this.decoded = result
-
-
-
-                } catch (e: Exception) {
-
-                }
-            }
-            else{
-
-            }
-        }
-        return decoded
-    }
-
-
-
-        fun post(event: String,text:String,atribute: String, onResult: (String) -> Unit) {
-            ser.get(
-                route = "get_all_recipes",
-                //params = mapOf("username" to "NakoLox", "password" to "Neko12")
-            ) { result ->
-                runOnUiThread {
-                    onResult(result) // ← передаём результат наружу
-                }
-            }
-    }
-}
 fun runOnUiThread(action: () -> Unit) {
     CoroutineScope(Dispatchers.Main).launch {
         action()
     }
 }
+fun drawableToBase64(context: Context, drawableId: Int): String {
+    val drawable = ContextCompat.getDrawable(context, drawableId)!!
 
+    // Получаем Bitmap из Drawable
+    val bitmap = if (drawable is BitmapDrawable) {
+        drawable.bitmap
+    } else {
+        val bmp = Bitmap.createBitmap(
+            drawable.intrinsicWidth,
+            drawable.intrinsicHeight,
+            Bitmap.Config.ARGB_8888
+        )
+        val canvas = Canvas(bmp)
+        drawable.setBounds(0, 0, canvas.width, canvas.height)
+        drawable.draw(canvas)
+        bmp
+    }
+
+    // Bitmap → ByteArray
+    val outputStream = ByteArrayOutputStream()
+    bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+    val byteArray = outputStream.toByteArray()
+
+    // ByteArray → Base64
+    return Base64.encodeToString(byteArray, Base64.DEFAULT)
+}
 
 fun parseServerResponse(response: String): List<MainActivity.Product> {
     val gson = Gson()
@@ -219,6 +212,7 @@ fun parseServerResponse(response: String): List<MainActivity.Product> {
             rating = p.rating.toString(),
             calories = p.caloric_content.toString(),
             avtor = p.author.username.ifBlank { "Инкогнито" },
+            id = p.id.toString().ifBlank { "00" },
             products = if (p.ingredients.isEmpty()) {
                 "Нет продуктов"
             } else {
@@ -242,6 +236,7 @@ class MainActivity : AppCompatActivity() {
         val rating: String = "",
         val calories: String = "Не указано",
         val avtor: String = "Инкогнито",
+        val id: String = "00",
         val products: String = "Нет продуктов"
     )
 
@@ -281,8 +276,6 @@ class MainActivity : AppCompatActivity() {
 
         fun onResume() {
             super.onResume()
-
-
             adapter.recreateList(recyclerView)
         }
 
@@ -291,49 +284,24 @@ class MainActivity : AppCompatActivity() {
         recyclerView.adapter = adapter
 
         adapter.initFavorites(this)       // ← грузим избранное ОДИН раз
-        adapter.updateProducts(LocalData().defaultProducts)
+        adapter.updateProducts(LocalData(this).defaultProducts)
 
-        var data = LocalData()
+        var data = LocalData(this)
 
 
-        button1.setOnClickListener {
+        button2.setOnClickListener {
             // --- Анимация ImageView ---
-            imageView2.animate()
+            imageView.animate()
                 .scaleX(0.85f)
                 .scaleY(0.85f)
                 .setDuration(90)
                 .withEndAction {
-                    imageView2.animate()
+                    imageView.animate()
                         .scaleX(1f)
                         .scaleY(1f)
                         .setDuration(90)
                         .withEndAction {
-                            py.sender { response ->
-                                if (response.isNotBlank()) {
-                                    try {
-                                        val products = parseServerResponse(response)
-                                        if (products.isNotEmpty()) {
-                                            runOnUiThread {
-                                                adapter.updateProducts(products)
-                                                Toast.makeText(this, "Обновлено", Toast.LENGTH_SHORT).show()
-                                            }
-                                        } else {
-                                            runOnUiThread {
-                                                Toast.makeText(this, "Нет корректных данных", Toast.LENGTH_SHORT).show()
-                                            }
-                                        }
-                                    } catch (e: Exception) {
-                                        runOnUiThread {
-                                            Toast.makeText(this, "Ошибка парсинга данных", Toast.LENGTH_SHORT).show()
-                                        }
-                                        e.printStackTrace()
-                                    }
-                                } else {
-                                    runOnUiThread {
-                                        Toast.makeText(this, "Пустой ответ от сервера", Toast.LENGTH_SHORT).show()
-                                    }
-                                }
-                            }
+                            adapter.updateProducts(data.defaultProducts)
                         }
                         .start()
                 }
@@ -358,7 +326,7 @@ class MainActivity : AppCompatActivity() {
 
                             if (saved.toString() != "[]"){
                                 val productList = saved.map {
-                                    Product(it.name, it.description, it.imageBase64, it.recipe,it.rating,it.calories,it.avtor,it.products)
+                                    Product(it.name, it.description, it.imageBase64, it.recipe,it.rating,it.calories,it.avtor,it.id,it.products)
                                 }.toMutableList()
 
                                 if (recyclerView.layoutManager == null) {
@@ -377,44 +345,43 @@ class MainActivity : AppCompatActivity() {
 
         }
 
-        button2.setOnClickListener {
+        button1.setOnClickListener {
 
-            imageView.animate()
+            imageView2.animate()
                 .scaleX(0.85f)
                 .scaleY(0.85f)
                 .setDuration(90)
                 .withEndAction {
-                    imageView.animate()
+                    imageView2.animate()
                         .scaleX(1f)
                         .scaleY(1f)
                         .setDuration(90)
                         .withEndAction {
 
-                            Toast.makeText(this, "11", Toast.LENGTH_SHORT).show()
-                            val api=Api()
-                            api.post("","","") { result ->
+                            //Toast.makeText(this, "11", Toast.LENGTH_SHORT).show()
+                            val api = Api()
+                            api.get("get_all_recipes"){ result ->
                                 if (result.isNotBlank()) {
                                     try {
                                         println(result)
                                         val products = parseServerResponse(result)
-                                        val decodeds = result.replace("\\u", "\\u")
-                                            .let { Pattern.compile("\\\\u([0-9A-Fa-f]{4})").matcher(it) }
-                                            .replaceAll { matchResult ->
-                                                Integer.parseInt(matchResult.group(1), 16).toChar().toString()
-                                            }
-                                        val i =
 
                                         //Toast.makeText(this, "!@"+result, Toast.LENGTH_SHORT).show()
 
-                                        println(result)
+                                        println("result="+result)
+                                        println("products="+products)
 
                                         adapter.updateProducts(products)
 
 
 
                                     } catch (e: Exception) {
-                                        Toast.makeText(this, "!"+e, Toast.LENGTH_SHORT).show()
-                                        println(e)
+                                        if(e.toString()=="org.json.JSONException: Value Ошибка of type java.lang.String cannot be converted to JSONObject"){
+                                            Toast.makeText(this, "Не удалось подключиться к серверу", Toast.LENGTH_SHORT).show()
+                                        }else{
+                                            Toast.makeText(this, "!"+e, Toast.LENGTH_SHORT).show()
+                                            println("!"+e)
+                                        }
                                     }
                                 }
                                 else{
@@ -433,7 +400,7 @@ class MainActivity : AppCompatActivity() {
         //Toast.makeText(this, "est.toString()" , Toast.LENGTH_SHORT).show()
             //fav.getFavorites()
             //adapter.updateProducts(data.drinks)
-            //Toast.makeText(this, "☕ Показаны напитки", Toast.LENGTH_SHORT).show()
+            //Toast.makeText(this, " Показаны напитки", Toast.LENGTH_SHORT).show()
 
 
         buttonReg.setOnClickListener {
@@ -448,8 +415,18 @@ class MainActivity : AppCompatActivity() {
                         .scaleY(1f)
                         .setDuration(90)
                         .withEndAction {
-                            val intent = Intent(this, Logining::class.java)
-                            startActivity(intent)
+                            val set = Settings(this)
+                            set.load()
+                            if (set.token == "" ){
+                                val intent = Intent(this, Logining::class.java)
+                                startActivity(intent)
+                            }else{
+                                //Toast.makeText(this, set.username, Toast.LENGTH_SHORT).show()
+                                data.editLits=data.editLits
+                                val intent = Intent(this, UserRecepi::class.java)
+                                startActivity(intent)
+
+                            }
                         }
                         .start()
                 }
@@ -462,9 +439,7 @@ class MainActivity : AppCompatActivity() {
         val drawer = findViewById<DrawerLayout>(R.id.drawerLayout)
         val nav = findViewById<NavigationView>(R.id.navigationView)
         val item1 = nav.menu.findItem(R.id.switch1)
-        val switch1 = item1.actionView?.findViewById<SwitchCompat>(R.id.switchControl)
         val item2 = nav.menu.findItem(R.id.switch2)
-        val switch2 = item2.actionView?.findViewById<SwitchCompat>(R.id.switchControl)
 
         val stng = Settings(this)
         stng.load() // загружаем настройки из памяти
@@ -494,14 +469,14 @@ class MainActivity : AppCompatActivity() {
                 .actionView?.findViewById<SwitchCompat>(R.id.switchControl)
             val switch3 = nav.menu.findItem(R.id.switch3)
                 .actionView?.findViewById<SwitchCompat>(R.id.switchControl)
+            val switch4 = nav.menu.findItem(R.id.switch4)
+                .actionView?.findViewById<SwitchCompat>(R.id.switchControl)
 
             // Ставим состояние из настроек
             switch1?.isChecked = stng.seeKalories
             switch2?.isChecked = stng.seeReting
             switch3?.isChecked = stng.BigLook
-
-
-
+            switch4?.isChecked = stng.seeId
 
             // Обработчик изменения
             switch1?.setOnCheckedChangeListener { _, isChecked ->
@@ -519,6 +494,12 @@ class MainActivity : AppCompatActivity() {
 
             switch3?.setOnCheckedChangeListener { _, isChecked ->
                 stng.BigLook = isChecked
+                stng.save()
+                onResume()
+            }
+
+            switch4?.setOnCheckedChangeListener { _, isChecked ->
+                stng.seeId = isChecked
                 stng.save()
                 onResume()
             }
