@@ -16,38 +16,11 @@ import java.util.regex.Pattern
 class Api(){
     private val ser = ServerApi()
 
-    var decoded: String =""
 
-    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
-    fun sender(): String {
-        get("get_all_recipes"){ result ->
-            if (result.isNotBlank()) {
-                try {
-                    val decodeds = result.replace("\\u", "\\u")
-                        .let { Pattern.compile("\\\\u([0-9A-Fa-f]{4})").matcher(it) }
-                        .replaceAll { matchResult ->
-                            Integer.parseInt(matchResult.group(1), 16).toChar().toString()
-                        }
-                    this.decoded = result
-
-
-
-                } catch (e: Exception) {
-
-                }
-            }
-            else{
-
-            }
-        }
-        return decoded
-    }
-
-
-
-    fun get(route: String,onResult: (String) -> Unit) {
+    fun get(route: String,token: String = "", onResult: (String) -> Unit) {
         ser.get(
             route = route,
+            token = token,
             //params = mapOf("username" to "NakoLox", "password" to "Neko12")
         ) { result ->
             runOnUiThread {
@@ -55,9 +28,10 @@ class Api(){
             }
         }
     }
-    fun post(event: String,text:String,atribute: String, onResult: (String) -> Unit) {
+    fun post(event: String,token: String="",text:String,atribute: String, onResult: (String) -> Unit) {
         ser.post(
             route = event,
+            token = token,
             params = mapOf("username" to text, "password" to atribute)
         ) { result ->
             runOnUiThread {
@@ -73,6 +47,7 @@ class ServerApi {
 
     fun post(
         route: String,
+        token: String,
         params: Map<String, String>,
         callback: (String) -> Unit
     ) {
@@ -85,6 +60,7 @@ class ServerApi {
 
         val request = Request.Builder()
             .url(curl)
+            .addHeader("Authorization", "Bearer $token")
             .post(formBody)
             .build()
 
@@ -105,11 +81,13 @@ class ServerApi {
 
     fun get(
         route: String,
-        callback: (String) -> Unit
+        token: String,
+        callback: (String) -> Unit,
     ) {
         val curl=this.url+route
         val request = Request.Builder()
             .url(curl)
+            .addHeader("Authorization", "Bearer $token")
             .get()
             .build()
 

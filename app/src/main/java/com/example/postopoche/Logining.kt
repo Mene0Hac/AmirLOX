@@ -125,7 +125,7 @@ class Logining : AppCompatActivity() {
                             val name = findViewById<EditText>(R.id.name)
                             pass = findViewById<EditText>(R.id.pass)
                             val api = Api()
-                            api.post("login_user",name.text.toString(),pass.text.toString()){ result ->
+                            api.post("login_user","",name.text.toString(),pass.text.toString()){ result ->
                                 if (result.isNotBlank()) {
                                     try {
                                         //println("999"+result)

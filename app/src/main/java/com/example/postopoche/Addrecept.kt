@@ -1,24 +1,20 @@
 package com.example.postopoche
 
+import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Canvas
-import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.util.Base64
 import androidx.appcompat.app.AppCompatActivity
 import android.widget.*
-import androidx.core.content.ContextCompat
 import com.example.postopoche.MainActivity.Product
-import java.io.ByteArrayOutputStream
 import android.net.Uri
+import android.text.InputType
 import com.yalantis.ucrop.UCrop
 import java.io.File
-import java.io.InputStream
-
+import android.widget.EditText
+import android.widget.LinearLayout
 
 
 
@@ -27,6 +23,8 @@ class Addrecept : AppCompatActivity() {
     private lateinit var edDescription: EditText
     private lateinit var edRecipe: EditText
     private lateinit var edProducts: EditText
+    private lateinit var btvAdd: Button
+    private lateinit var btvDel: Button
     private lateinit var edCalories: EditText
     private lateinit var imgRecipe: ImageView
     private lateinit var btnSave: Button
@@ -35,8 +33,46 @@ class Addrecept : AppCompatActivity() {
     private var currentImageBase64: String? = null
     private var recipeId: String? = null
 
+
+    fun showAddProductDialog() {
+        val builder = androidx.appcompat.app.AlertDialog.Builder(this)
+        builder.setTitle("Добавить продукт")
+
+        val layout = LinearLayout(this)
+        layout.orientation = LinearLayout.VERTICAL
+
+        val productInput = EditText(this)
+        productInput.hint = "Название продукта"
+        layout.addView(productInput)
+
+        val countInput = EditText(this)
+        countInput.hint = "Количество"
+        countInput.inputType = InputType.TYPE_CLASS_NUMBER
+        layout.addView(countInput)
+
+        builder.setView(layout)
+
+        builder.setPositiveButton("Добавить") { _, _ ->
+            val product = productInput.text.toString()
+            val count = countInput.text.toString().toIntOrNull() ?: 0
+
+            products.add(product)
+            counts.add(count)
+        }
+
+        builder.setNegativeButton("Отмена", null)
+        builder.show()
+    }
+
+    val products: MutableList<String> = mutableListOf()
+    val counts: MutableList<Int> = mutableListOf()
+
+    val data: MutableList<List<Any>> = mutableListOf(products, counts)
+
+
     var img:String = ""
 
+    @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val settings = Settings(this)
@@ -45,6 +81,9 @@ class Addrecept : AppCompatActivity() {
         edName = findViewById(R.id.edName)
         edDescription = findViewById(R.id.edDescription)
         edRecipe = findViewById(R.id.edRecipe)
+
+        btvAdd = findViewById(R.id.buttonAddProduct)
+        btvDel = findViewById(R.id.buttonDelProduct)
 
         edProducts = findViewById(R.id.edProducts)
         edCalories = findViewById(R.id.edCalories)
@@ -55,23 +94,28 @@ class Addrecept : AppCompatActivity() {
 
         loadIncomingData()
 
+        btvAdd.setOnClickListener {
+            AddProduct()
+        }
+        btvDel.setOnClickListener {
+            DelProduct()
+        }
+
         btnSave.setOnClickListener {
             settings.load()
-            println("111img "+img)
+            val token = settings.token
+            println("!!daTa= "+data)
             settings.temp = img
             settings.save()
             if (settings.username !=""){
-                val returnData = Pair("token=${settings.token}", Product(
+                val returnData = Product(
+                    id = recipeId.toString(),
                     name = edName.text.toString(),
                     description = edDescription.text.toString(),
                     imageBase64 = "",
                     recipe = edRecipe.text.toString(),
-                    rating = "",
-                    calories = edCalories.text.toString(),
-                    avtor = "",
-                    id = recipeId.toString(),
-                    products = edProducts.text.toString()
-                ))
+                    products = edProducts.text.toString(),  // инградиенты для амира
+                )
             }
         }
         chooseImage()
@@ -86,6 +130,7 @@ class Addrecept : AppCompatActivity() {
         val recipe = i.getStringExtra("recipe")
         val calories = i.getStringExtra("calories")
         val products = i.getStringExtra("products")
+        //val products = i.getStringExtra("products")
 
         recipeId = id
 
@@ -95,7 +140,7 @@ class Addrecept : AppCompatActivity() {
             edName.setText(name)
             edDescription.setText(desc)
             edRecipe.setText(recipe)
-            edProducts.setText(products)
+            edProducts.setText(data.toString())
             edCalories.setText(calories)
 
             currentImageBase64 = image64
@@ -107,7 +152,73 @@ class Addrecept : AppCompatActivity() {
                 imgRecipe.setImageResource(R.drawable.apple)
             }
             btnSave.text = "Сохранить изменения"
-        }else imgRecipe.setImageResource(R.drawable.apple)
+        }
+    }
+
+    fun AddProduct() {
+        val builder = androidx.appcompat.app.AlertDialog.Builder(this)
+        builder.setTitle("Добавить продукт")
+
+        val layout = LinearLayout(this)
+        layout.orientation = LinearLayout.VERTICAL
+
+        val productInput = EditText(this)
+        productInput.hint = "Название продукта"
+        layout.addView(productInput)
+
+        val countInput = EditText(this)
+        countInput.hint = "Количество"
+        countInput.inputType = InputType.TYPE_CLASS_NUMBER
+        layout.addView(countInput)
+
+        builder.setView(layout)
+
+        builder.setPositiveButton("Добавить") { _, _ ->
+            val product = productInput.text.toString()
+            val count = countInput.text.toString().toIntOrNull() ?: 0
+
+            products.add(product)
+            counts.add(count)
+
+            // 👇 добавляем в edProducts, чтобы ингредиенты были видны в поле
+            edProducts.setText(products.joinToString(", ") + "\n" + counts.joinToString(", "))
+        }
+
+        builder.setNegativeButton("Отмена", null)
+        builder.show()
+
+    }
+
+    fun DelProduct() {
+        if (products.isEmpty()) {
+            Toast.makeText(this, "Список продуктов пуст", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Массив продуктов для отображения в диалоге
+        val items = products.toTypedArray()
+
+        val builder = androidx.appcompat.app.AlertDialog.Builder(this)
+        builder.setTitle("Удалить продукт")
+
+        builder.setItems(items) { _, which ->
+            // which — индекс выбранного элемента
+            val deletedProduct = products[which]
+            val deletedCount = counts[which]
+
+            products.removeAt(which)
+            counts.removeAt(which)
+
+            Toast.makeText(this, "Удалено: $deletedProduct ($deletedCount)", Toast.LENGTH_SHORT).show()
+
+            // обновляем поле edProducts
+            edProducts.setText(
+                products.joinToString(", ") + "\n" + counts.joinToString(", ")
+            )
+        }
+
+        builder.setNegativeButton("Отмена", null)
+        builder.show()
     }
 
     private fun chooseImage() {
@@ -159,5 +270,5 @@ class Addrecept : AppCompatActivity() {
 
 
 
-
 }
+

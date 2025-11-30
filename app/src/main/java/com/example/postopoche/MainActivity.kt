@@ -421,10 +421,34 @@ class MainActivity : AppCompatActivity() {
                                 val intent = Intent(this, Logining::class.java)
                                 startActivity(intent)
                             }else{
-                                //Toast.makeText(this, set.username, Toast.LENGTH_SHORT).show()
-                                data.editLits=data.editLits
+                                val api = Api()
+                                api.get("get_my_recipes",set.token){ result ->
+                                    if (result.isNotBlank()) {
+                                        println("!!res "+result)
+                                        try {
+                                            if (result == "[]"){
+                                                data.editLits=data.editLits
+                                            }
+
+                                        } catch (e: Exception) {
+                                            if(e.toString()=="org.json.JSONException: Value Ошибка of type java.lang.String cannot be converted to JSONObject"){
+                                                //Toast.makeText(this, "Не удалось подключиться к серверу", Toast.LENGTH_SHORT).show()
+                                            }else{
+                                                //Toast.makeText(this, "!"+e, Toast.LENGTH_SHORT).show()
+                                                println("!"+e)
+                                            }
+                                        }
+                                    }
+                                    else{
+                                        Toast.makeText(this, "44", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+
                                 val intent = Intent(this, UserRecepi::class.java)
                                 startActivity(intent)
+
+                                //Toast.makeText(this, set.username, Toast.LENGTH_SHORT).show()
+
 
                             }
                         }

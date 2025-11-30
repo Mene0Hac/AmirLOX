@@ -39,7 +39,7 @@ class Registering : AppCompatActivity() {
                                 println("pass1"+pass+"||"+pass2)
                                 Toast.makeText(this, "PassOk", Toast.LENGTH_SHORT).show()
                                 val api = Api()
-                                api.post("register_user",name,pass){ result ->
+                                api.post("register_user","",name,pass){ result ->
                                     if (result.isNotBlank()) {
                                         try {
 
