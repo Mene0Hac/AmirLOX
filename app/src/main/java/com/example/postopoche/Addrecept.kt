@@ -15,6 +15,9 @@ import com.yalantis.ucrop.UCrop
 import java.io.File
 import android.widget.EditText
 import android.widget.LinearLayout
+import com.example.android01.Api
+import com.google.gson.Gson
+import com.google.gson.annotations.SerializedName
 
 
 
@@ -66,10 +69,17 @@ class Addrecept : AppCompatActivity() {
 
     val products: MutableList<String> = mutableListOf()
     val counts: MutableList<Int> = mutableListOf()
-
     val data: MutableList<List<Any>> = mutableListOf(products, counts)
 
-
+    data class ProductPost(
+        val name: String = "Без названия",
+        val description: String = "Тут должно быть описание",
+        val imageBase64: String? = null,
+        val recipe: String = "Рецепта нет!",
+        val calories: String = "Не указано",
+        val id: String = "",
+        val products: String = "Нет продуктов"
+    )
     var img:String = ""
 
     @SuppressLint("MissingInflatedId")
@@ -107,15 +117,52 @@ class Addrecept : AppCompatActivity() {
             println("!!daTa= "+data)
             settings.temp = img
             settings.save()
-            if (settings.username !=""){
-                val returnData = Product(
-                    id = recipeId.toString(),
-                    name = edName.text.toString(),
-                    description = edDescription.text.toString(),
-                    imageBase64 = "",
-                    recipe = edRecipe.text.toString(),
-                    products = edProducts.text.toString(),  // инградиенты для амира
-                )
+            var id = recipeId.toString()
+
+            val returndata = mapOf(
+                "id" to recipeId.toString(),
+                "name" to edName.text.toString(),
+                "description" to edDescription.text.toString(),
+                "imageBase64" to "",
+                "recipe" to edRecipe.text.toString(),
+                "products" to edProducts.text.toString()
+            )
+
+            if (id!="") {
+                val api = Api()
+                api.post("/test", token,returndata) { result ->
+                    if (result.isNotBlank()) {
+                        println("!!res " + result)
+                        try {
+
+                        } catch (e: Exception) {
+                            if (e.toString() == "org.json.JSONException: Value Ошибка of type java.lang.String cannot be converted to JSONObject") {
+                                //Toast.makeText(this, "Не удалось подключиться к серверу", Toast.LENGTH_SHORT).show()
+                            } else {
+                                //Toast.makeText(this, "!"+e, Toast.LENGTH_SHORT).show()
+                                println("!" + e)
+                            }
+                        }
+                    }
+                }
+            }else{
+                val api = Api()
+                api.post("/test", token,returndata) { result ->
+                    if (result.isNotBlank()) {
+                        println("!!res1 " + result)
+                        try {
+
+                        } catch (e: Exception) {
+                            if (e.toString() == "org.json.JSONException: Value Ошибка of type java.lang.String cannot be converted to JSONObject") {
+                                //Toast.makeText(this, "Не удалось подключиться к серверу", Toast.LENGTH_SHORT).show()
+                            } else {
+                                //Toast.makeText(this, "!"+e, Toast.LENGTH_SHORT).show()
+                                println("!" + e)
+                            }
+                        }
+                    }
+                }
+
             }
         }
         chooseImage()
@@ -180,7 +227,7 @@ class Addrecept : AppCompatActivity() {
             products.add(product)
             counts.add(count)
 
-            // 👇 добавляем в edProducts, чтобы ингредиенты были видны в поле
+            // добавляем в edProducts, чтобы ингредиенты были видны в поле
             edProducts.setText(products.joinToString(", ") + "\n" + counts.joinToString(", "))
         }
 

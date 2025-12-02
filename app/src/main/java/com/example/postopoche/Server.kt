@@ -28,11 +28,12 @@ class Api(){
             }
         }
     }
-    fun post(event: String,token: String="",text:String,atribute: String, onResult: (String) -> Unit) {
+    fun post(route: String,token: String="",params: Map<String, String>, onResult: (String) -> Unit) {
         ser.post(
-            route = event,
+            route = route,
             token = token,
-            params = mapOf("username" to text, "password" to atribute)
+            params = params
+            // params = mapOf("username" to text, "password" to atribute)
         ) { result ->
             runOnUiThread {
                 onResult(result) // передаём результат наружу
@@ -43,7 +44,7 @@ class Api(){
 class ServerApi {
 
     private val client = OkHttpClient()
-    private val url= "http://5.182.87.105:5001/"
+    private val url= "http://26.196.186.232:5001/"
 
     fun post(
         route: String,

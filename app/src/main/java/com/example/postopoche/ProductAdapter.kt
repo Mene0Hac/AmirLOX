@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.postopoche.MainActivity.Product
 import android.content.Context
 import android.content.res.ColorStateList
+import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.view.Gravity
 import android.view.View
@@ -32,6 +33,12 @@ object ImageBase64Cache {
     }
 
     fun get(key: String): String? = cache[key]
+}
+
+object BitmapCache {
+    private val cache = mutableMapOf<String, Bitmap>()
+    fun put(key: String, bmp: Bitmap) { cache[key] = bmp }
+    fun get(key: String) = cache[key]
 }
 
 
@@ -58,6 +65,15 @@ class ProductAdapter(
     fun updateProducts(newProducts: List<Product>) {
         products.clear()
         products.addAll(newProducts)
+
+        products.forEach { product ->
+            val favKey = product.name + "|" + product.description
+            if (product.imageBase64 != null && BitmapCache.get(favKey) == null) {
+                val bmp = decodeBase64Safe(product.imageBase64, 800, 800)
+                if (bmp != null) BitmapCache.put(favKey, bmp)
+            }
+        }
+
         notifyDataSetChanged()
     }
 
@@ -304,7 +320,8 @@ class ProductAdapter(
 
         val product = products[position]
 
-        val key = "img_$position"   // уникальный ключ
+        val key = product.name + "|" + product.description
+        //val key2 = "img_$position"   // уникальный ключ
 
         val realBase64 = ImageBase64Cache.get(key) ?: product.imageBase64
 
@@ -353,7 +370,16 @@ class ProductAdapter(
 
         holder.name.text = product.name
         holder.description.text = product.description
-        holder.setProductImage(product.imageBase64)
+        //holder.setProductImage(product.imageBase64)
+
+        val favKey = product.name + "|" + product.description
+        val bmp = BitmapCache.get(favKey)
+        if (bmp != null) {
+            holder.image.setImageBitmap(bmp)
+        } else {
+            holder.image.setImageResource(R.drawable.apple)
+        }
+
         holder.recipe.text = product.recipe
 
 
@@ -422,10 +448,16 @@ class ProductAdapter(
                     val key = product.id ?: product.name
                     val realBase64 = ImageBase64Cache.get(key) ?: product.imageBase64
 
+
+                    // Если в продукте есть base64 — кладём в кэш
+                    product.imageBase64?.let { base64 -> ImageBase64Cache.put(key, base64) }
+
+
+
                     val intent = Intent(holder.card.context, ProductDetails::class.java)
                     intent.putExtra("name", product.name)
                     intent.putExtra("description", product.description)
-                    intent.putExtra("imageBase64", realBase64)
+                    intent.putExtra("key", key)
                     intent.putExtra("recipe", product.recipe)
                     intent.putExtra("rating", product.rating)
                     intent.putExtra("calories", product.calories)

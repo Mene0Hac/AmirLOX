@@ -62,7 +62,12 @@ class ProductDetails : AppCompatActivity() {
 
         val name = intent.getStringExtra("name")
         val desc = intent.getStringExtra("description")
-        val imgBase64 = intent.getStringExtra("imageBase64")
+
+        val key = intent.getStringExtra("key")
+        val imgBase64 = key?.let { ImageBase64Cache.get(it) }
+
+
+        //val imgBase64 = intent.getStringExtra("imageBase64")
         val recipe =  intent.getStringExtra("recipe")
         val rating =  intent.getStringExtra("rating")
         val calories =  intent.getStringExtra("calories")

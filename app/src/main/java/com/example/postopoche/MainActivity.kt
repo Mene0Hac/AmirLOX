@@ -92,6 +92,29 @@ class LocalData (private val context: Context){
         return settings.temp
     }
 
+    val localProduct = listOf(
+        Product("Салат Цезарь", "Классический салат с курицей и соусом Цезарь.", (drawableToBase64(context,R.drawable.cezar)), "Обжарить курицу, смешать с салатом, сухариками и соусом.", "4.8", "210", "admin", "1", "курица, салат, сухари"),
+        Product("Борщ", "Традиционный суп из свёклы с насыщенным вкусом.", (drawableToBase64(context,R.drawable.borsh)), "Сварить бульон, добавить овощи, свёклу, варить 40 минут.", "4.9", "120", "admin", "2", "свекла, капуста, картофель"),
+        Product("Паста Карбонара", "Сливочная паста с беконом и сыром.", (drawableToBase64(context,R.drawable.pasta_carbanara)), "Отварить пасту, обжарить бекон, смешать с яйцом и сыром.", "4.7", "320", "admin", "3", "паста, бекон, сыр"),
+        Product("Оливье", "Классический салат с колбасой и овощами.", (drawableToBase64(context,R.drawable.olive)), "Нарезать ингредиенты и смешать с майонезом.", "4.6", "250", "admin", "4", "картофель, морковь, колбаса"),
+        Product("Пицца Маргарита", "Тонкая пицца с сыром и томатами.", (drawableToBase64(context,R.drawable.pizza_margarita)), "На тесто нанести соус, сыр, томаты, запечь.", "4.8", "270", "admin", "5", "сыр, томаты, тесто"),
+        Product("Греческий салат", "Свежий салат из овощей и феты.", (drawableToBase64(context,R.drawable.salat_rim)), "Нарезать овощи, добавить фету и масло.", "4.7", "150", "admin", "6", "огурец, фета, помидоры"),
+        Product("Плов", "Рис с мясом и специями по восточному рецепту.", (drawableToBase64(context,R.drawable.plov)), "Обжарить мясо, добавить рис и специи, тушить.", "4.9", "330", "admin", "7", "рис, мясо, морковь"),
+        Product("Шашлык", "Маринованное мясо, жаренное на углях.", (drawableToBase64(context,R.drawable.yak)), "Замариновать мясо и пожарить на мангале.", "4.8", "295", "admin", "8", "свинина, специи"),
+        Product("Блины", "Тонкие румяные блины.", (drawableToBase64(context,R.drawable.blini)), "Смешать тесто и обжарить на сковороде.", "4.9", "190", "admin", "9", "мука, яйца, молоко"),
+        Product("Суп-пюре", "Кремовый суп из овощей.", (drawableToBase64(context,R.drawable.sup_pure)), "Отварить овощи и измельчить блендером.", "4.5", "130", "admin", "10", "морковь, картофель, сливки"),
+        Product("Курица Терияки", "Курица в сладком соусе.", (drawableToBase64(context,R.drawable.teriak_chiken)), "Обжарить курицу и залить соусом терияки.", "4.8", "240", "admin", "11", "курица, соус терияки"),
+        Product("Фахитас", "Мексиканское блюдо с курицей и перцем.", (drawableToBase64(context,R.drawable.fahitas)), "Обжарить курицу и овощи, завернуть в лепешку.", "4.6", "280", "admin", "12", "курица, перец, лаваш"),
+        Product("Жареный рис", "Рис с овощами по азиатски.", (drawableToBase64(context,R.drawable.ris)), "Обжарить рис с овощами и яйцом.", "4.7", "210", "admin", "13", "рис, яйцо, овощи"),
+        Product("Тарталетки", "Лёгкая закуска с начинкой.", (drawableToBase64(context,R.drawable.tartaletcy)), "Наполнить корзинки салатом или паштетом.", "4.6", "110", "admin", "14", "корзинки, начинка"),
+        Product("Котлеты", "Сочные домашние котлеты.", "", "Смешать фарш, сформировать котлеты и обжарить.", "4.8", "260", "admin", "15", "фарш, лук"),
+        Product("Сырники", "Нежные творожные сырники.", "", "Смешать творог с мукой, жарить на сковороде.", "4.9", "180", "admin", "16", "творог, мука"),
+        Product("Омлет", "Лёгкое блюдо из яиц.", (drawableToBase64(context,R.drawable.omlet)), "Взбить яйца и обжарить на масле.", "4.5", "140", "admin", "17", "яйца, масло"),
+        Product("Стейк", "Говяжий стейк средней прожарки.", (drawableToBase64(context,R.drawable.yak)), "Обжарить мясо до желаемой прожарки.", "4.9", "350", "admin", "18", "говядина"),
+        Product("Суши", "Рис с рыбой в рулетах.", (drawableToBase64(context,R.drawable.sysi)), "Сформировать роллы из риса и рыбы.", "4.8", "200", "admin", "19", "рис, рыба"),
+        Product("Гуляш", "Мясо в густом соусе.", (drawableToBase64(context,R.drawable.gylih)), "Тушить мясо в соусе с овощами.", "4.7", "280", "admin", "20", "говядина, овощи")
+    )
+
     val defaultProducts = mutableListOf(
         Product("Яблоко", "Свежее красное яблоко",(drawableToBase64(context,R.drawable.yak)),avtor="mene"),
         Product("Банан", "Спелый жёлтый банан", imageBase64 = load(context)),
@@ -136,15 +159,6 @@ class LocalData (private val context: Context){
     )
 
 
-    val vegetables = listOf(
-        Product("Морковь", "Полезная и хрустящая","",""),
-        Product("Огурец", "Свежий и зелёный","","")
-    )
-
-    val drinks = listOf(
-        Product("Сок", "Апельсиновый, натуральный","",""),
-        Product("Кофе", "Ароматный и бодрящий","","")
-    )
 
 
 }
@@ -228,6 +242,7 @@ fun parseServerResponse(response: String): List<MainActivity.Product> {
 
 class MainActivity : AppCompatActivity() {
 
+
     data class Product(
         val name: String = "Без названия",
         val description: String = "Тут должно быть описание",
@@ -301,7 +316,7 @@ class MainActivity : AppCompatActivity() {
                         .scaleY(1f)
                         .setDuration(90)
                         .withEndAction {
-                            adapter.updateProducts(data.defaultProducts)
+                            adapter.updateProducts(data.localProduct)
                         }
                         .start()
                 }

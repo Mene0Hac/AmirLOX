@@ -125,11 +125,11 @@ class Logining : AppCompatActivity() {
                             val name = findViewById<EditText>(R.id.name)
                             pass = findViewById<EditText>(R.id.pass)
                             val api = Api()
-                            api.post("login_user","",name.text.toString(),pass.text.toString()){ result ->
+                            val params = mapOf("username" to name.text.toString(), "password" to pass.text.toString())
+                            api.post("login_user","",params){ result ->
                                 if (result.isNotBlank()) {
                                     try {
-                                        //println("999"+result)
-
+                                        println("999"+result)
                                         val obj = JSONObject(result)
                                         val token = obj.getString("token")
                                         val username = obj.getString("username")

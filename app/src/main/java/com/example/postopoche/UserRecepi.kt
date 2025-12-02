@@ -39,6 +39,8 @@ class UserRecepi: AppCompatActivity() {
         val buttonExit: Button = findViewById(R.id.buttonExit)
         val buttonBack: Button = findViewById(R.id.button)
         val buttonAdd: Button = findViewById(R.id.buttonAdd)
+        val imageViewExit: ImageView = findViewById(R.id.imageView14)
+        val imageViewBack: ImageView = findViewById(R.id.imageView10)
 
         recyclerView = findViewById(R.id.RecyclerVievUser)
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -49,24 +51,39 @@ class UserRecepi: AppCompatActivity() {
         adapter.updateProducts(data.editLits)
 
         buttonExit.setOnClickListener {
-            val builder = androidx.appcompat.app.AlertDialog.Builder(this)
-            builder.setTitle("Выход")
-            builder.setMessage("Вы действительно хотите выйти из своей учётной записи?")
+            imageViewExit.animate()
+                .scaleX(0.85f)
+                .scaleY(0.85f)
+                .setDuration(90)
+                .withEndAction {
+                    imageViewExit.animate()
+                        .scaleX(1f)
+                        .scaleY(1f)
+                        .setDuration(90)
+                        .withEndAction {
+                            val builder = androidx.appcompat.app.AlertDialog.Builder(this)
+                            builder.setTitle("Выход")
+                            builder.setMessage("Вы действительно хотите выйти из своей учётной записи?")
 
-            builder.setNegativeButton("Отмена") { dialog, _ ->
-                dialog.dismiss()
-            }
+                            builder.setNegativeButton("Отмена") { dialog, _ ->
+                                dialog.dismiss()
+                            }
 
-            builder.setPositiveButton("Выйти") { dialog, _ ->
-                settings.username = ""
-                settings.token = ""
-                settings.save()
-                dialog.dismiss()
-                onBackPressedDispatcher.onBackPressed()
-            }
+                            builder.setPositiveButton("Выйти") { dialog, _ ->
+                                settings.username = ""
+                                settings.token = ""
+                                settings.save()
+                                dialog.dismiss()
+                                onBackPressedDispatcher.onBackPressed()
+                            }
 
-            val dialog = builder.create()
-            dialog.show()
+                            val dialog = builder.create()
+                            dialog.show()
+                        }
+                        .start()
+                }
+                .start()
+
         }
 
         buttonAdd.setOnClickListener{
@@ -76,7 +93,22 @@ class UserRecepi: AppCompatActivity() {
         }
 
         buttonBack.setOnClickListener {
-            onBackPressedDispatcher.onBackPressed()
+            imageViewBack.animate()
+                .scaleX(0.85f)
+                .scaleY(0.85f)
+                .setDuration(90)
+                .withEndAction {
+                    imageViewBack.animate()
+                        .scaleX(1f)
+                        .scaleY(1f)
+                        .setDuration(90)
+                        .withEndAction {
+                            onBackPressedDispatcher.onBackPressed()
+                        }
+                        .start()
+                }
+                .start()
+
         }
 
     }

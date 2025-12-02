@@ -4,6 +4,8 @@ import android.content.Context
 import org.json.JSONArray
 import org.json.JSONObject
 
+
+
 class FavoritesManager(context: Context) {
 
     private val prefs = context.getSharedPreferences("favorites_data", Context.MODE_PRIVATE)
