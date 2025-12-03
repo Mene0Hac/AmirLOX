@@ -19,7 +19,7 @@ import android.widget.Toast
 import com.example.android01.Api
 import org.json.JSONObject
 import kotlinx.coroutines.*
-
+import com.google.gson.Gson
 
 var seePass = false
 class Py2 {
@@ -125,7 +125,8 @@ class Logining : AppCompatActivity() {
                             val name = findViewById<EditText>(R.id.name)
                             pass = findViewById<EditText>(R.id.pass)
                             val api = Api()
-                            val params = mapOf("username" to name.text.toString(), "password" to pass.text.toString())
+                            val gson = Gson()
+                            val params = gson.toJson(mapOf("username" to name.text.toString(), "password" to pass.text.toString()))
                             api.post("login_user","",params){ result ->
                                 if (result.isNotBlank()) {
                                     try {

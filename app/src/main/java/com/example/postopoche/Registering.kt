@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.widget.TextView
 import android.widget.Toast
 import com.example.android01.Api
+import com.google.gson.Gson
 import org.json.JSONObject
 
 class Registering : AppCompatActivity() {
@@ -39,7 +40,8 @@ class Registering : AppCompatActivity() {
                                 println("pass1"+pass+"||"+pass2)
                                 Toast.makeText(this, "PassOk", Toast.LENGTH_SHORT).show()
                                 val api = Api()
-                                val params = mapOf("username" to name, "password" to pass)
+                                val gson = Gson()
+                                val params = gson.toJson(mapOf("username" to name, "password" to pass))
                                 api.post("register_user","",params){ result ->
                                     if (result.isNotBlank()) {
                                         try {
@@ -58,6 +60,10 @@ class Registering : AppCompatActivity() {
                                                 set.token=token
                                                 Toast.makeText(this, set.username, Toast.LENGTH_SHORT).show()
                                                 set.save()
+
+                                                val intent = Intent(this, MainActivity::class.java)
+                                                this.startActivity(intent)
+
                                             }else{
                                                 Toast.makeText(this, "!"+status, Toast.LENGTH_SHORT).show()
                                             }

@@ -9,6 +9,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.postopoche.runOnUiThread
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.IOException
 import java.util.regex.Pattern
 
@@ -28,7 +30,7 @@ class Api(){
             }
         }
     }
-    fun post(route: String,token: String="",params: Map<String, String>, onResult: (String) -> Unit) {
+    fun post(route: String,token: String="",params: String, onResult: (String) -> Unit) {
         ser.post(
             route = route,
             token = token,
@@ -44,25 +46,22 @@ class Api(){
 class ServerApi {
 
     private val client = OkHttpClient()
-    private val url= "http://26.196.186.232:5001/"
+    private val url= "http://5.182.87.105:5001/"
 
     fun post(
         route: String,
         token: String,
-        params: Map<String, String>,
+        params: String,
         callback: (String) -> Unit
     ) {
-        val curl=this.url+route
-        val formBodyBuilder = FormBody.Builder()
-        for ((key, value) in params) {
-            formBodyBuilder.add(key, value)
-        }
-        val formBody = formBodyBuilder.build()
+        val url = this.url + route
+
+        val body = params.toRequestBody("application/json; charset=utf-8".toMediaType())
 
         val request = Request.Builder()
-            .url(curl)
+            .url(url)
             .addHeader("Authorization", "Bearer $token")
-            .post(formBody)
+            .post(body)
             .build()
 
         client.newCall(request).enqueue(object : Callback {
@@ -74,11 +73,12 @@ class ServerApi {
                 if (response.isSuccessful) {
                     callback(response.body?.string() ?: "Нет ответа")
                 } else {
-                    callback("Ошибка сервера")
+                    callback("Ошибка сервера: ${response.code}")
                 }
             }
         })
     }
+
 
     fun get(
         route: String,

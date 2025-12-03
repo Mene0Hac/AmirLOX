@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.util.Base64
 import androidx.appcompat.app.AppCompatActivity
 import android.widget.*
-import com.example.postopoche.MainActivity.Product
 import android.net.Uri
 import android.text.InputType
 import com.yalantis.ucrop.UCrop
@@ -17,10 +16,6 @@ import android.widget.EditText
 import android.widget.LinearLayout
 import com.example.android01.Api
 import com.google.gson.Gson
-import com.google.gson.annotations.SerializedName
-import com.google.gson.reflect.TypeToken
-
-
 
 
 class Addrecept : AppCompatActivity() {
@@ -37,6 +32,8 @@ class Addrecept : AppCompatActivity() {
 
     private var currentImageBase64: String? = null
     private var recipeId: String? = null
+
+
 
 
     fun showAddProductDialog() {
@@ -73,14 +70,14 @@ class Addrecept : AppCompatActivity() {
     val counts: MutableList<Int> = mutableListOf()
     val data: MutableList<List<Any>> = mutableListOf(products, counts)
 
-    data class ProductPost(
-        val name: String = "Без названия",
-        val description: String = "Тут должно быть описание",
-        val imageBase64: String? = null,
-        val recipe: String = "Рецепта нет!",
-        val calories: String = "Не указано",
-        val id: String = "",
-        val products: String = "Нет продуктов"
+    data class RecipeRequest(
+        val id: String,
+        val title: String,
+        val description: String,
+        val imageBase64: String,
+        val description_of_cooking_process: String,
+        val caloric_content: String,
+        val ingredients: Map<String, String>
     )
     var img:String = ""
 
@@ -100,6 +97,8 @@ class Addrecept : AppCompatActivity() {
         edProducts = findViewById(R.id.edProducts)
         edCalories = findViewById(R.id.edCalories)
         imgRecipe = findViewById(R.id.imgRecipe)
+
+        edProducts = findViewById(R.id.edProducts)
 
         btnSave = findViewById(R.id.btnSave)
         btnChooseImage = findViewById(R.id.btnChooseImage)
@@ -121,22 +120,27 @@ class Addrecept : AppCompatActivity() {
             settings.save()
             var id = recipeId.toString()
             val gson = Gson()
+            fun listsToMap(keys: List<String>, values: MutableList<Int>): Map<String, String> {
+                require(keys.size == values.size) { "Разный размер списков!!" }           // Проверяем, что списки одинаковой длины
+                val array2d = keys.indices.map { index -> listOf(keys[index], values[index]) }
+                return array2d.associate { (it[0] to it[1].toString()) as Pair<String, String> }
+            }
 
-            val returndata = mapOf(
-                "id" to recipeId.toString(),
-                "title" to edName.text.toString(),
-                "description" to edDescription.text.toString(),
-                "imageBase64" to "",
-                "description_of_cooking_process" to edRecipe.text.toString(),
-                //"products" to edProducts.text.toString()
-                "caloric_content" to edCalories.text.toString(),
-                "ingredients" to gson.toJson(listOf(products, counts))
+            val returndata = gson.toJson(
+                mapOf(
+                    "id" to recipeId.toString(),
+                    "title" to edName.text.toString(),
+                    "description" to edDescription.text.toString(),
+                    "imageBase64" to "",
+                    "description_of_cooking_process" to edRecipe.text.toString(),
+                    "caloric_content" to edCalories.text.toString(),
+                    "ingredients" to listsToMap(products, counts)   // ← ВАЖНО!
+                )
             )
-
 
             if (id!="") {
                 val api = Api()
-                api.post("/test", token,returndata) { result ->
+                api.post("/create_recipe", token,returndata) { result ->
                     if (result.isNotBlank()) {
                         println("!!res " + result)
                         try {
@@ -185,7 +189,13 @@ class Addrecept : AppCompatActivity() {
         val products = i.getStringExtra("products")
         //val products = i.getStringExtra("products")
 
+        //val products: String = intent.getStringExtra("products") ?: ""
+
+        addIngredientsFromString(products)   // !!
         recipeId = id
+
+
+        println("ppp"+products)
 
         Toast.makeText(this, "!"+id, Toast.LENGTH_SHORT).show()
         // если данные пришли — это режим редактирования
@@ -281,6 +291,32 @@ class Addrecept : AppCompatActivity() {
             startActivityForResult(pick, 100)
         }
     }
+
+    fun addIngredientsFromString(ingredientsStr: String?) {
+        if (ingredientsStr.isNullOrBlank()) return
+
+        // Разделяем по запятой, чтобы получить отдельные элементы
+        val items = ingredientsStr.split(",").map { it.trim() }
+
+        for (item in items) {
+            // Разделяем по "||"
+            val parts = item.split("||").map { it.trim() }
+            if (parts.size == 2) {
+                val product = parts[0]
+                val count = parts[1].toIntOrNull() ?: 0
+
+                // Добавляем в массивы
+                products.add(product)
+                counts.add(count)
+            }
+        }
+    }
+
+
+
+
+
+
 
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

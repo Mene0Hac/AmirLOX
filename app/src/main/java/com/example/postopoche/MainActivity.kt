@@ -49,10 +49,22 @@ import java.io.File
 import java.util.regex.Pattern
 
 
-class savet(){
-    var username = ""
-    var token = ""
+object ProductStore {
+    private val productLists = mutableMapOf<String, List<Product>>()
+
+    fun put(key: String, list: List<Product>) {
+        productLists[key] = list
+    }
+
+    fun get(key: String): List<Product>? {
+        return productLists[key]
+    }
+
+    fun remove(key: String) {
+        productLists.remove(key)
+    }
 }
+
 
 data class ServerResponse(
     val data: List<ProductJson>
@@ -203,7 +215,6 @@ class LocalData (private val context: Context){
 
 
 
-
 }
 
 class Py {
@@ -273,7 +284,7 @@ fun parseServerResponse(response: String): List<MainActivity.Product> {
             products = if (p.ingredients.isEmpty()) {
                 "Нет продуктов"
             } else {
-                p.ingredients.joinToString(", ") { it.title }
+                p.ingredients.joinToString(", ") { it.title+"||"+it.amount }
             }
         )
     }
@@ -485,8 +496,15 @@ class MainActivity : AppCompatActivity() {
                                     if (result.isNotBlank()) {
                                         println("!!res "+result)
                                         try {
-                                            if (result == "[]"){
-                                                data.editLits=data.editLits
+                                            if (result != "[]"){
+                                                val products = parseServerResponse(result)
+                                                val listKey = "myEditLitsKey" // можно сгенерировать уникальный ID
+                                                ProductStore.put(listKey, products)
+
+                                                val intent = Intent(this, UserRecepi::class.java)
+                                                intent.putExtra("listKey", listKey)
+                                                startActivity(intent)
+
                                             }
 
                                         } catch (e: Exception) {

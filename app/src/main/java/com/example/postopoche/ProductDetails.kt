@@ -76,7 +76,7 @@ class ProductDetails : AppCompatActivity() {
         val products =  intent.getStringExtra("products")
 
         val textView3: TextView = findViewById(R.id.textView3)
-        textView3.text = "!"+avtor+"!"
+        textView3.text = "!"+products+"!"
 
         if (!imgBase64.isNullOrEmpty()) {
 

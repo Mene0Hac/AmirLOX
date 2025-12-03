@@ -35,6 +35,12 @@ class UserRecepi: AppCompatActivity() {
         val data = LocalData(this)
         val settings = Settings(this)
 
+        val listKey = intent.getStringExtra("listKey")
+
+        //val products = listKey?.let { ProductStore.get(it) }
+
+        val products = listKey?.let { ProductStore.get(it) } ?: emptyList()
+        println("4440 "+products)
 
         val buttonExit: Button = findViewById(R.id.buttonExit)
         val buttonBack: Button = findViewById(R.id.button)
@@ -48,7 +54,10 @@ class UserRecepi: AppCompatActivity() {
         adapter = ProductAdapter(this, mutableListOf())
         recyclerView.adapter = adapter
         adapter.initFavorites(this)
-        adapter.updateProducts(data.editLits)
+
+
+        println("***! "+products)
+        adapter.updateProducts(products)
 
         buttonExit.setOnClickListener {
             imageViewExit.animate()
@@ -74,11 +83,15 @@ class UserRecepi: AppCompatActivity() {
                                 settings.token = ""
                                 settings.save()
                                 dialog.dismiss()
-                                onBackPressedDispatcher.onBackPressed()
+
+                                val intent = Intent(this, MainActivity::class.java)
+                                this.startActivity(intent)
+
                             }
 
                             val dialog = builder.create()
                             dialog.show()
+
                         }
                         .start()
                 }
@@ -103,7 +116,8 @@ class UserRecepi: AppCompatActivity() {
                         .scaleY(1f)
                         .setDuration(90)
                         .withEndAction {
-                            onBackPressedDispatcher.onBackPressed()
+                            val intent = Intent(this, MainActivity::class.java)
+                            this.startActivity(intent)
                         }
                         .start()
                 }
