@@ -449,7 +449,7 @@ class ProductAdapter(
                     val realBase64 = ImageBase64Cache.get(key) ?: product.imageBase64
 
 
-                    // Если в продукте есть base64 — кладём в кэш
+                    // Если в продукте есть base64 — кладём в кэш и отдаём его ключь
                     product.imageBase64?.let { base64 -> ImageBase64Cache.put(key, base64) }
 
 

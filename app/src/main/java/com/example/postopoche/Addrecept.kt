@@ -18,6 +18,8 @@ import android.widget.LinearLayout
 import com.example.android01.Api
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
+import com.google.gson.reflect.TypeToken
+
 
 
 
@@ -118,15 +120,19 @@ class Addrecept : AppCompatActivity() {
             settings.temp = img
             settings.save()
             var id = recipeId.toString()
+            val gson = Gson()
 
             val returndata = mapOf(
                 "id" to recipeId.toString(),
-                "name" to edName.text.toString(),
+                "title" to edName.text.toString(),
                 "description" to edDescription.text.toString(),
                 "imageBase64" to "",
-                "recipe" to edRecipe.text.toString(),
-                "products" to edProducts.text.toString()
+                "description_of_cooking_process" to edRecipe.text.toString(),
+                //"products" to edProducts.text.toString()
+                "caloric_content" to edCalories.text.toString(),
+                "ingredients" to gson.toJson(listOf(products, counts))
             )
+
 
             if (id!="") {
                 val api = Api()
